@@ -1,4 +1,4 @@
-#include "implementation.h"
+#include "../implementation.h"
 
 #define BOOST_TEST_MAIN test
 #define BOOST_TEST_MODULE implementationTest
@@ -26,6 +26,17 @@ float test4(int num) {
 void test5(std::unordered_map<int, std::string> m) {
     boost::this_thread::sleep(boost::posix_time::milliseconds(500));
     m[709] = "Queen";
+    boost::this_thread::sleep(boost::posix_time::milliseconds(500));
+}
+std::string test6(int i, float f, double d, std::string s, char c) {
+    boost::this_thread::sleep(boost::posix_time::milliseconds(500));
+    s += c;
+    boost::this_thread::sleep(boost::posix_time::milliseconds(500));
+    return s;
+}
+void test7(int i, float f, double d, std::string s, char c) {
+    boost::this_thread::sleep(boost::posix_time::milliseconds(500));
+    s += c;
     boost::this_thread::sleep(boost::posix_time::milliseconds(500));
 }
 
@@ -109,6 +120,38 @@ BOOST_AUTO_TEST_CASE(voidSpecializationAndCompoundTypesTest)
     m[666] = "God knows, God knows I want to break free";
     
     int id = impl.execute(test5, m);
+
+    boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+
+    BOOST_CHECK_EQUAL(impl.status(id), FS_Running);
+
+    boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+    
+    BOOST_CHECK_EQUAL(impl.status(id), FS_Ready);
+}
+
+BOOST_AUTO_TEST_CASE(manyTypesTest)
+{
+    Implementation<std::string, int, float, double, std::string, char> impl(1);
+
+    int id = impl.execute(test6, 1, 2.3, 4.5, "ok", 'a');
+
+    boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+
+    BOOST_CHECK_EQUAL(impl.status(id), FS_Running);
+
+    boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+    
+    BOOST_CHECK_EQUAL(impl.status(id), FS_Ready);
+
+    BOOST_CHECK_EQUAL(impl.result(id), "oka");
+}
+
+BOOST_AUTO_TEST_CASE(voidSpecializationAndManyTypesTest)
+{
+    Implementation<void, int, float, double, std::string, char> impl(1);
+
+    int id = impl.execute(test7, 1, 2.3, 4.5, "ok", 'a');
 
     boost::this_thread::sleep(boost::posix_time::milliseconds(100));
 
